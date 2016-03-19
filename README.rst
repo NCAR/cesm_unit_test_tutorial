@@ -1,3 +1,9 @@
+General notes
+=============
+
+The instructions here assume that you are using a recent development version of
+CESM, such as in the cesm1_5 beta series.
+
 Organization
 ============
 
