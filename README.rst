@@ -1,3 +1,7 @@
+.. sectnum::
+
+.. contents::
+
 General notes
 =============
 
