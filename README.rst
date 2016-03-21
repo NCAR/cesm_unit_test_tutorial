@@ -46,6 +46,11 @@ current CESM checkout. e.g., for bash, you would use::
 
   export CIMEROOT=/path/to/source_code/cime
 
+(This setting of ``CIMEROOT`` isn't actually required by any of the unit test
+build scripts, but is used as a convenience in the instructions below. You may
+also explicitly enter the path to cime wherever you see $CIMEROOT in these
+instructions.)
+
 
 General notes
 -------------
@@ -60,9 +65,13 @@ First ``cd`` to the directory containing the top-level ``CMakeLists.txt`` file
 for the component you want to unit test. This is:
 
 * clm: components/clm/src
-* cam: FIXME
-* csm_share: FIXME
-* driver_cpl: FIXME
+* cam: components/cam/test/unit
+
+  * The CAM unit testing is broken at least as of cam5_4_51 (and for many
+    previous tags). It works in
+    https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/fix_unit_tests_with_cime_tags/fix_unit_tests_with_cime_n01_cam5_4_51
+
+* cime (includes csm_share and driver_cpl): cime
 
 You must be in an interactive session on caldera to build and run the unit
 tests. The easiest way to do this is to run::
@@ -75,3 +84,22 @@ Then run the following command::
 
   $CIMEROOT/tools/unit_testing/run_tests.py --test-spec-dir=. --compiler=intel --mpilib=mpich2 \
   --mpirun-command=mpirun.lsf --cmake-args=-DPAPI_LIB=/glade/apps/opt/papi/5.3.0/intel/12.1.5/lib64
+
+Determining if unit tests successfully built and ran
+----------------------------------------------------
+
+If the build was successful, you should get a message that looks like this::
+
+  ==================================================
+  Running CTest tests for __command_line_test__/__command_line_test__.
+  ==================================================
+
+Followed by a list of tests. Most (if not all) should pass. You should then see
+a final message like this::
+
+  100% tests passed, 0 tests failed out of 16
+
+If just one or two tests fail, this could mean that these tests are currently
+broken in the version of the code you're using. **Note that all CAM unit tests
+are broken on the trunk at least as of cam5_4_51 (and for many previous tags).**
+
