@@ -28,16 +28,6 @@ set(NETCDF_DIR "/usr/local")
 set(CMAKE_EXE_LINKER_FLAGS "-lhdf5_hl")
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
-# The following commented out lines did not work in terms of finding an hdf5 library:
-# set(HDF5_DIR "/usr/local")
-# set(CMAKE_PREFIX_PATH "/usr/local")
-#
-# Interestingly, the link step works without the above lines if I get
-# -L/usr/local/Cellar/netcdf/4.3.2_1/lib -lnetcdff -L/usr/local/Cellar/netcdf/4.3.2_1/lib -lnetcdf -lnetcdf
-# on the link line, but the default link line from FindNETCDF instead has
-# /usr/local/lib/libnetcdff.a /usr/local/lib/libnetcdf.a
-# (Sean Santos thinks that the dynamic libraries point to the correct hdf5
-# library, whereas the static libraries do not.)
 
 # The following is needed so that the above include_directories are listed after
 # any include_directories specified by the top-level CMakeLists.txt
