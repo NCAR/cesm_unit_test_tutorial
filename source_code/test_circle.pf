@@ -69,7 +69,7 @@ contains
   ! Tests need to have the '@Test' macro in order for pFUnit to recognize them as tests
   ! that it should run.
   @Test
-  subroutine circleArea_radius1(this)
+  subroutine circleArea_radius1_equalsPi(this)
     ! If you defined a class, above, then each test method needs to take an argument of
     ! that class. Here we call the argument 'this', following a standard object-oriented
     ! convention, but you can name it whatever you want.
@@ -86,10 +86,10 @@ contains
     ! Generally use one of pFUnit's @assert macros
     @assertEqual(pi, area, tolerance=tol)
 
-  end subroutine circleArea_radius1
+  end subroutine circleArea_radius1_equalsPi
 
   @Test
-  subroutine circleArea_radius2(this)
+  subroutine circleArea_radius2_withinBounds(this)
     class(TestCircle), intent(inout) :: this
     real(r8) :: area
 
@@ -99,8 +99,14 @@ contains
     area = circle_area(2.0_r8)
 
     ! Verify
-    @assertEqual(4._r8 * pi, area, tolerance=tol)
+    !
+    ! This demonstrates some other assertion macros that can be useful. It also shows that
+    ! you can have multiple assertions in a single test. The test fails if any of the
+    ! assertions fail. Don't go overboard with this! Tests are clearest if they test a
+    ! single, well-defined condition.
+    @assertGreaterThan(area, 3.9_r8 * pi)
+    @assertLessThan(area, 4.1_r8 * pi)
 
-  end subroutine circleArea_radius2
+  end subroutine circleArea_radius2_withinBounds
 
 end module test_circle
