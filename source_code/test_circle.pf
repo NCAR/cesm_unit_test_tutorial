@@ -1,21 +1,106 @@
 module test_circle
 
-use pfunit_mod
+  ! Tests of circle module. Note that the module name (test_circle here) can be anything
+  ! you want.
 
-use circle, only: circle_area, pi, r8
+  ! Always need to use pfunit_mod
+  use pfunit_mod
 
-implicit none
+  ! Always need to use the module you're testing
+  use circle, only : circle_area, pi
 
-! Roundoff level tolerance.
-real(r8), parameter :: tol = 1.e-15_r8
+  ! Can use any other CESM modules, too (just need to make sure they are included in the
+  ! unit test build - i.e., listed in a CMakeLists.txt file)
+  use shr_kind_mod, only : r8 => shr_kind_r8
+
+  implicit none
+
+  ! Defining this class is optional. However, doing so allows you to take advantage of
+  ! some of the more advanced features of pFUnit, such as a setUp and tearDown method. I
+  ! generally just go ahead and define this when I create a new set of tests, so that the
+  ! structure is there if I need to use the setUp or tearDown methods later. See below for
+  ! more comments on these methods.
+  !
+  ! The name (TestCircle here) can be anything you want.
+  !
+  ! You can add any data or procedures to this class (using the object-oriented features
+  ! of Fortran 2003). However, the setUp and tearDown methods have special meaning, as
+  ! described below.
+  @TestCase
+  type, extends(TestCase) :: TestCircle
+     ! This variable isn't actually used in these tests, but is here to illustrate the
+     ! setup and teardown methods
+     real(r8), pointer :: somedata(:)
+   contains
+     procedure :: setUp
+     procedure :: tearDown
+  end type TestCircle
+
+  ! Roundoff level tolerance
+  real(r8), parameter :: tol = 1.e-15_r8
 
 contains
 
-@Test
-subroutine test_circle_area()
+  ! Code in this setUp method will be executed before each test. This is convenient if you
+  ! need to do some setup that is the same for every test.
+  subroutine setUp(this)
+    class(TestCircle), intent(inout) :: this
 
-  @assertEqual(pi, circle_area(1.0_r8), tolerance=tol)
+    ! This variable isn't actually used in these tests, but is here to illustrate the
+    ! setup and teardown methods
+    allocate(this%somedata(17))
+    this%somedata(:) = 0._r8
+  end subroutine setUp
 
-end subroutine test_circle_area
+  ! Code in this tearDown method will be executed after each test. This is often used to
+  ! deallocate memory. Any teardown like this should generally happen in this tearDown
+  ! method. This is because, if an assertion fails, the test aborts. So any teardown code
+  ! in the test method (following the failed assert statement) is skipped, but this
+  ! tearDown method is still called. In order for this to work, you sometimes need to
+  ! move variables that might otherwise be subroutine-local to the class (TestCircle in
+  ! this case) - because the tearDown method can access class instance variables, but not
+  ! subroutine-local variables.
+  subroutine tearDown(this)
+    class(TestCircle), intent(inout) :: this
+
+    deallocate(this%somedata)
+  end subroutine tearDown
+
+  ! Tests need to have the '@Test' macro in order for pFUnit to recognize them as tests
+  ! that it should run.
+  @Test
+  subroutine circleArea_radius1(this)
+    ! If you defined a class, above, then each test method needs to take an argument of
+    ! that class. Here we call the argument 'this', following a standard object-oriented
+    ! convention, but you can name it whatever you want.
+    class(TestCircle), intent(inout) :: this
+    real(r8) :: area
+
+    ! Setup: Nothing to do for this test
+
+    ! Exercise
+    area = circle_area(1.0_r8)
+
+    ! Verify
+    !
+    ! Generally use one of pFUnit's @assert macros
+    @assertEqual(pi, area, tolerance=tol)
+
+  end subroutine circleArea_radius1
+
+  @Test
+  subroutine circleArea_radius2(this)
+    class(TestCircle), intent(inout) :: this
+    real(r8) :: area
+
+    ! Setup: Nothing to do for this test
+
+    ! Exercise
+    area = circle_area(2.0_r8)
+
+    ! Verify
+    @assertEqual(4._r8 * pi, area, tolerance=tol)
+
+  end subroutine circleArea_radius2
 
 end module test_circle
