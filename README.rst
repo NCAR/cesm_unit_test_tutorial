@@ -109,7 +109,7 @@ CESM, plus pFUnit. These include:
 * cmake 2.8 or later
 * python 2.7 or later
 * netcdf 4.3.2 or later (4.3.3.1 recommended)
-* pFUnit: details below
+* pFUnit: details in `Installing pFUnit`_
 
 Installing pFUnit
 """""""""""""""""
@@ -290,7 +290,7 @@ A good unit test has four distinct pieces:
 
 #. **Teardown**: e.g., deallocate variables. **However, if this is needed, you
    should almost always do this teardown in the special tearDown routine, as
-   discussed below.**
+   discussed in the section,** `Defining a test class`_.
 
 pFUnit provides many assertion methods that you can use in the Verify step. Some
 of the most useful are the following:
