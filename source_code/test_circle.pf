@@ -29,7 +29,7 @@ module test_circle
   @TestCase
   type, extends(TestCase) :: TestCircle
      ! This variable isn't actually used in these tests, but is here to illustrate the
-     ! setup and teardown methods
+     ! setup and teardown methods.
      real(r8), pointer :: somedata(:)
    contains
      procedure :: setUp
@@ -104,8 +104,8 @@ contains
     ! you can have multiple assertions in a single test. The test fails if any of the
     ! assertions fail. Don't go overboard with this! Tests are clearest if they test a
     ! single, well-defined condition.
-    @assertGreaterThan(area, 3.9_r8 * pi)
-    @assertLessThan(area, 4.1_r8 * pi)
+    @assertLessThan(3.9_r8 * pi, area)
+    @assertGreaterThan(4.1_r8 * pi, area)
 
   end subroutine circleArea_radius2_withinBounds
 

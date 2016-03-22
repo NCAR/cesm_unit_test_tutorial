@@ -193,3 +193,263 @@ If just one or two tests fail, this could mean that these tests are currently
 broken in the version of the code you're using. **Note that all CAM unit tests
 are broken on the trunk at least as of cam5_4_51 (and for many previous tags).**
 
+
+Writing the unit tests
+======================
+
+Source code for this tutorial
+-----------------------------
+
+For the sake of this tutorial, we will test the ``circle_area`` function defined
+in the file ``circle.F90`` in the subdirectory ``source_code``.
+
+Copy the file ``source_code/circle.F90`` into the source tree of the component
+you are interested in unit testing.
+
+Let's use the following directories (pick one, based on which component you're
+interested in unit testing):
+
+* clm: components/clm/src/main
+* cam: components/cam/src/utils
+* csm_share: cime/share/csm_share/shr
+* driver_cpl: cime/driver_cpl/driver
+
+Creating a directory for your unit tests
+----------------------------------------
+
+Because of the way our unit test build system is set up, it works best to have a
+separate directory for each collection of unit tests. This collection is often a
+single module / file in the production code, but it could also be a group of
+related modules.
+
+For this tutorial, you will create a directory named ``circle_test``. Where you
+should put this differs for each component:
+
+* clm: components/clm/src/main/test/
+
+  * Unit tests live in the subdirectory of the code they are testing
+
+* cam: components/cam/test/unit
+
+  * Unit tests are all together in this directory
+
+* csm_share: cime/share/csm_share/test/unit
+
+  * Unit tests are all together in this directory
+
+* driver_cpl: cime/driver_cpl/unit_test
+
+  * Unit tests are all together in this directory
+
+Create a directory named ``circle_test`` as a subdirectory of one of the above
+directories (for whichever component you're interested in unit testing).
+
+Writing the unit tests
+----------------------
+
+For the sake of this tutorial, we will use a set of unit tests that have already
+been written for ``circle_area``.
+
+Copy the file ``source_code/test_circle.pf`` into the directory you created
+above.
+
+Note that the ``.pf`` extension marks this as a file that should be
+processed by the pFUnit pre-processor. This is basically Fortran code, but with
+a few pFUnit-specific annotations, which start with ``@``.
+
+Read through that file, and try to understand how the tests are set up. If you
+haven't done any object-oriented programming using Fortran2003 before, then
+don't feel a need to understand the TestCircle class for now. (A ``class`` is
+basically like a ``type`` in Fortran, but it can also have procedures -
+functions and subroutines - in addition to data.) Pay particular attention to
+the two subroutines that are preceded by the ``@Test`` macro: these are the two
+tests we will run against the ``circle_area`` function.
+
+General guidelines for writing unit tests
+-----------------------------------------
+
+Good unit tests test a single, well-defined condition. This generally means that
+you make a single call to the function / subroutine that you're testing, with a
+single set of inputs. This means that you usually need multiple tests of the
+function / subroutine, in order to test all of its possible behavior. The main
+reasons for testing a single condition in each test are:
+
+* This makes it easier to pinpoint a problem when a test fails
+* This makes it easier to read and understand the tests, allowing the tests to
+  serve as useful documentation of how the code should operate
+
+A good unit test has four distinct pieces:
+
+#. **Setup**: e.g., create variables that will be needed for the routine you're
+   testing. For simple tests, this piece may be empty.
+
+#. **Exercise**: Call the routine you're testing
+
+#. **Verify**: Call assertion methods to ensure that the results matched what
+   you expected
+
+#. **Teardown**: e.g., deallocate variables. **However, if this is needed, you
+   should almost always do this teardown in the special tearDown routine, as
+   discussed below.**
+
+pFUnit provides many assertion methods that you can use in the Verify step. Some
+of the most useful are the following:
+
+* @assertEqual(expected, actual)
+
+  * accepts an optional ``tolerance`` argument giving the tolerance for
+    real-valued comparisons
+
+* @assertLessThan(expected, actual)
+
+  * Ensures that expected < actual
+
+* @assertGreaterThan(expected, actual)
+
+  * Ensures that expected > actual
+
+* @assertLessThanOrEqual(expected, actual)
+
+* @assertGreaterThanOrEqual(expected, actual)
+
+* @assertTrue(condition)
+
+  * It's better to use the two-valued assertions above, if possible. For
+    example, use ``@assertEqual(foo, bar)`` rather than ``@assertTrue(foo ==
+    bar)``: the former gives more information if the test fails.
+
+* @assertFalse(condition)
+
+* assertIsFinite(value)
+
+  * Ensures that the result is not NaN or infinity
+
+* assertIsNan(value)
+
+  * Can be useful for failure checking, e.g., if your function returns NaN to
+    signal an error
+
+Comparison assertions accept an optional ``tolerance`` argument, which gives the
+tolerance for real-valued comparisons.
+
+In addition, all of the assertion methods accept an optional ``message``
+argument, which gives a string that will be printed if the assertion fails. If
+no message is provided, you will be pointed to the file and line number of the
+failed assertion.
+
+If you have many tests of the same subroutine, then you'll often find quite a
+lot of duplication between the tests. It's good practice to extract major areas
+of duplication to their own subroutines in the .pf file, which can be called by
+your tests. This aids the understandability and maintainability of your
+tests. pFUnit knows which subroutines are tests and which are "helper" routines
+because of the ``@Test`` annotations: You only add a ``@Test`` annotation for
+your tests, not for your helper routines.
+
+Defining a test class
+---------------------
+
+As noted in the comments in ``test_circle.pf``, the definition of a test class
+(here, ``TestCircle``) is optional. I generally go adead and define a minimal
+test class when I first write a new .pf file::
+
+  @TestCase
+  type, extends(TestCase) :: TestCircle
+   contains
+     procedure :: setUp
+     procedure :: tearDown
+  end type TestCircle
+
+If you define this test class, then you also need to:
+
+* Define setUp and tearDown subroutines. These can start out empty::
+
+    subroutine setUp(this)
+      class(TestCircle), intent(inout) :: this
+    end subroutine setUp
+
+    subroutine tearDown(this)
+      class(TestCircle), intent(inout) :: this
+    end subroutine tearDown
+
+* Add an argument to each test subroutine, of class ``TestCircle`` (or whatever
+  you called your test class). By convention, this argument is named ``this``.
+
+Defining this test class allows you to take advantage of some useful pFUnit
+features like the setUp and tearDown methods.
+
+Code in the setUp method will be executed before each test. This is convenient
+if you need to do some setup that is the same for every test.
+
+Code in the tearDown method will be executed after each test. This is often used
+to deallocate memory. **Any teardown like this should generally happen in this
+tearDown method. This is because, if an assertion fails, the test aborts. So any
+teardown code in the test method (following the failed assert statement) is
+skipped, but this tearDown method is still called.** In order for this to work,
+you sometimes need to move variables that might otherwise be subroutine-local to
+the class - because the tearDown method can access class instance variables, but
+not subroutine-local variables.
+
+You can add any data or procedures to the test class. Adding data is
+particularly useful, as this can be a way for the setUp and tearDown methods to
+interact with your tests: The setUp method can fill a class variable with data,
+which can then be used by your tests (accessed via
+``this%somedata``). Conversely, if you want the tearDown method to deallocate a
+variable, that variable cannot be local to your test subroutine. Instead, you
+can make the variable a member of the class, so that the tearDown method can
+access it. It is perfectly acceptable to have something like this in your test
+routine::
+
+  allocate(this%somedata(5))
+  this%somedata(:) = [1,2,3,4,5]
+
+Then your tearDown method can have code like this::
+
+  if (associated(this%somedata)) then
+    deallocate(this%somedata)
+  end if
+
+
+pFUnit documentation and examples
+---------------------------------
+
+Some pFUnit documentation is available here: http://pfunit.sourceforge.net/
+
+If you download pFUnit (from
+http://sourceforge.net/projects/pfunit/files/latest/download), you can find more
+extensive documentation and examples in the following places. Among other
+things, this can show you other assertion methods that are available:
+
+* documentation/pFUnit3-ReferenceManual.pdf
+
+* Examples/
+
+* tests/
+
+  * These are tests of the pFUnit code itself, written in pFUnit. You can see
+    many uses of pFUnit features in these tests.
+
+
+Finding more documentation and examples in CESM
+===============================================
+
+Documentation of the unit test build system
+-------------------------------------------
+
+The CMake build infrastructure is in ``cime/externals/CMake``.
+
+The infrastructure for building and running tests with ``run_tests.py`` is in
+``cime/tools/unit_testing``. That directory also contains some general
+documentation about how to use the CESM unit test infrastructure (in the
+``README`` file), and examples (in the ``Examples`` directory).
+
+Finding more detailed examples
+------------------------------
+
+At this point, there are many examples of unit tests in CESM, some simple and
+some quite complex. You can find these by looking for files with the '.pf'
+extension::
+
+  find . -name '*.pf'
+
+You can also see examples of the unit test build scripts by viewing the
+CMakeLists.txt files throughout the source tree.
