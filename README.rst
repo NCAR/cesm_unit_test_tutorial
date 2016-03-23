@@ -399,8 +399,10 @@ which can then be used by your tests (accessed via
 ``this%somedata``). Conversely, if you want the tearDown method to deallocate a
 variable, that variable cannot be local to your test subroutine. Instead, you
 can make the variable a member of the class, so that the tearDown method can
-access it. So, for example, if you have this variable in your test class (as in
-the example)::
+access it.
+
+So, for example, if you have this variable in your test class (as in the
+example)::
 
   real(r8), pointer :: somedata(:)
 
