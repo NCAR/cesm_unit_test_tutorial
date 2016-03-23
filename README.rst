@@ -2,30 +2,33 @@
 
 .. contents::
 
-General notes
-=============
+General notes and organization of this tutorial repository
+==========================================================
 
 The instructions here assume that you are using a recent development version of
 CESM, such as in the cesm1_5 beta series.
 
-Organization
-============
+The file you are currently reading provides the main instructions for building,
+running and writing unit tests.
 
-This file describes aspects of building, running and writing unit tests that are
-common to all components.
+There are also the following subdirectories:
 
-Subdirectories *cam*, *clm*, *csm_share* and *driver_cpl* contain instructions
-and sample files specific for setting up unit tests with each of those
-components. Each of those directories contains a README file that describes
-steps unique to that component.
+* ``presentations`` contains presentations that have been given about unit
+  testing in CESM
 
-Subdirectory *common* contains sample code that is used in all of the examples.
+* ``source_code`` contains the source code used for this tutorial - both the
+  function to be tested and the test code
 
-Subdirectory *presentations* contains presentations that have been given about
-unit testing in CESM.
+* ``local_machine_build_scripts`` contains files that facilitate building and
+  running the unit tests on your local desktop or laptop (rather than on
+  yellowstone)
 
-Building and Running Unit Tests
-===============================
+* ``cmake_files`` contains the CMake-based build scripts needed to build the
+  unit tests in this tutorial; these can also be used as templates for your own
+  unit tests
+
+Building and running the existing unit tests
+============================================
 
 Before you write your own unit tests, you should make sure that you can build
 and run the existing tests.
@@ -429,6 +432,131 @@ things, this can show you other assertion methods that are available:
     many uses of pFUnit features in these tests.
 
 
+Building and running your new unit tests
+========================================
+
+We build the unit tests using a build system called CMake. There are a few steps
+needed to get your new unit tests to build alongside the others:
+
+#. `Add the new production module to the build system`_
+
+#. `Tell CMake about your new unit test directory`_
+
+#. `Add a CMakeLists.txt file in your new unit test directory`_
+
+This might look complicated, but once you have done it a few times, it should
+only take a few minutes.
+
+Add the new production module to the build system
+-------------------------------------------------
+
+You must first tell CMake about the new source code you have written - i.e., the
+production module (not the test code).
+
+If the source code directory already contains CMakeLists.txt
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Look in the directory where you added the source code (if you're doing the
+example in this tutorial, this is the directory where you added circle.F90). If
+this directory already has a ``CMakeLists.txt`` file, then simply add your new
+file to the list of source files in this ``CMakeLists.txt`` file.
+
+In the case of csm_share, there are multiple source lists in
+``CMakeLists.txt``. You should add the new file to the ``share_sources`` list.
+
+If the source code directory does not yet contain CMakeLists.txt
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If this directory does *not* already have a ``CMakeLists.txt`` file, you will
+need to add one. Follow the example of other ``CMakeLists.txt`` files for the
+component you're working with. In addition, you will need to add an
+``add_subdirectory`` call in the top-level ``CMakeLists.txt`` file in
+``$UNITTEST_ROOT``. For example, if you have added source code in
+``components/cam/src/control``, then you will need to create a
+``CMakeLists.txt`` file in that directory containing these lines::
+
+  list(APPEND cam_sources your_new_file.F90)
+  sourcelist_to_parent(cam_sources)
+
+and you will need to add the following line in
+``components/cam/test/unit/CMakeLists.txt``::
+
+  add_subdirectory(${CAMROOT}src/control control_cam)
+
+Adding dependencies
+^^^^^^^^^^^^^^^^^^^
+
+If your new module depends on other modules (via use statements), either
+directly or indirectly, then those must also be included in the unit test
+build, following the same instructions as above. I generally just try building
+the unit tests and seeing if the build complains: it will tell you about any
+missing dependencies.
+
+Testing the build
+^^^^^^^^^^^^^^^^^
+
+If you'd like, you can test the build at this point, before going on to the next
+step.
+
+Tell CMake about your new unit test directory
+---------------------------------------------
+
+Add an ``add_subdirectory`` call in the appropriate ``CMakeLists.txt`` file to
+add the new unit test directory. For the ``circle_test`` example, this looks
+like::
+
+  add_subdirectory(circle_test)
+
+This should be added in the ``CMakeLists.txt`` file in the parent directory of
+your new test directory. For this example, this is:
+
+* For CLM: components/clm/src/main/test/CMakeLists.txt
+
+* For CAM: components/cam/test/unit/CMakeLists.txt
+
+* For csm_share: cime/share/csm_share/test/unit/CMakeLists.txt
+
+* For driver_cpl: cime/driver_cpl/unit_test/CMakeLists.txt
+
+Special note for CLM
+^^^^^^^^^^^^^^^^^^^^
+
+For CLM: If your unit tests are in a new subdirectory that didn't have any tests
+before (e.g., ``cpl``), then you will also need to add an ``add_subdirectory``
+call at the bottom of ``components/clm/src/CMakeLists.txt``, as in::
+
+  add_subdirectory(${CLM_ROOT}/src/cpl/test clm_cpl_test)
+
+
+Add a CMakeLists.txt file in your new unit test directory
+---------------------------------------------------------
+
+You need to put a ``CMakeLists.txt`` file in your new unit test directory, which
+tells CMake how to build this unit test. For this ``circle_test`` example, you
+can copy one of the files from the ``cmake_files`` subdirectory of this
+repository. Pick the file matching the component you are testing. Copy this file
+into your new unit test directory (the directory containing
+``test_circle.pf``). **Rename the file to just CMakeLists.txt.**
+
+The main difference between the components is whether each unit test explicitly
+lists the source files that it depends on (currently done for CAM and
+csm_share), or all unit tests link against an already-built library (currently
+done for CLM and driver_cpl). There are pros and cons of each approach; for now,
+just follow the style of whatever component you're writing unit tests for.
+
+When you write your own unit tests, you can use the appropriate ``CMakeLists``
+file as a template. You will need to replace any names that refer to ``circle``;
+other than that, these templates should work without modification in most cases.
+
+Run your new unit tests
+-----------------------
+
+Finally you're ready to build and run your new unit tests!
+
+Follow the instructions under `Building and running the existing unit
+tests`_. If all goes well, you should see the ``circle`` test suite listed
+somewhere in the list of tests, and it should be listed as having ``Passed``.
+
 Finding more documentation and examples in CESM
 ===============================================
 
@@ -453,3 +581,5 @@ extension::
 
 You can also see examples of the unit test build scripts by viewing the
 CMakeLists.txt files throughout the source tree.
+
+  

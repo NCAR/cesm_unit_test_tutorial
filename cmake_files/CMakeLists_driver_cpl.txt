@@ -1,0 +1,38 @@
+# List all of the .pf files in this directory. Here we just have one, but this
+# can be a list of multiple files.
+set (pfunit_sources
+  test_circle.pf)
+
+# Extra sources used for this test, which are not .pf files. This can be useful
+# if you have multiple .pf files, which need to share some utility functions. In
+# that case, you can put the utility functions in a plain .F90 file in the test
+# directory, and 'use' that module from your various .pf files. You would list
+# that .F90 file here.
+#
+# Here we don't have any extra sources, so it's just an empty list.
+#
+# Note that, for driver_cpl, we do NOT need to list files in the production
+# source tree - e.g., circle.F90. Those will be linked against in the
+# target_link_libraries line, below.
+set (extra_sources
+  )
+
+# Do source preprocessing and add the executable.
+#
+# The first two arguments here are:
+# - the name of this test suite (printed when you run the tests)
+# - the name of the executable that will be built
+#
+# The other arguments are the lists you defined above
+create_pFUnit_test(circle test_circle_exe
+  "${pfunit_sources}" "${extra_sources}")
+
+# For driver_cpl unit tests, we link against an already-built driver_cpl library
+# (rather than explicitly listing all source files that the test depends on). We
+# also link against other lower-level libraries that may be needed. These are
+# all given in the variable DRV_UNIT_TEST_LIBS (which is set in a higher-level
+# CMakeLists.txt file).
+#
+# Make sure that the first argument here matches the name of the executable in
+# create_pFUnit_test.
+target_link_libraries(test_circle_exe ${DRV_UNIT_TEST_LIBS})
