@@ -344,7 +344,8 @@ Look in the directory where you added the source code (if you're doing the
 example in this tutorial, this is the directory where you added circle.F90). If
 this directory already has a ``CMakeLists.txt`` file (which should be the case
 if you used one of the directories suggested above), then simply add your new
-file to the list of source files in this ``CMakeLists.txt`` file.
+file - ``circle.F90`` in this example - to the list of source files in this
+``CMakeLists.txt`` file.
 
 In the case of csm_share, there are multiple source lists in
 ``CMakeLists.txt``. You should add the new file to the ``share_sources`` list.
