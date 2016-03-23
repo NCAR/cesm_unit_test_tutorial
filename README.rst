@@ -323,11 +323,11 @@ of the most useful are the following:
 
 * @assertFalse(condition)
 
-* assertIsFinite(value)
+* @assertIsFinite(value)
 
   * Ensures that the result is not NaN or infinity
 
-* assertIsNan(value)
+* @assertIsNan(value)
 
   * Can be useful for failure checking, e.g., if your function returns NaN to
     signal an error
@@ -362,6 +362,9 @@ test class when I first write a new .pf file::
      procedure :: tearDown
   end type TestCircle
 
+Defining this test class allows you to take advantage of some useful pFUnit
+features like the setUp and tearDown methods.
+
 If you define this test class, then you also need to:
 
 * Define setUp and tearDown subroutines. These can start out empty::
@@ -376,9 +379,6 @@ If you define this test class, then you also need to:
 
 * Add an argument to each test subroutine, of class ``TestCircle`` (or whatever
   you called your test class). By convention, this argument is named ``this``.
-
-Defining this test class allows you to take advantage of some useful pFUnit
-features like the setUp and tearDown methods.
 
 Code in the setUp method will be executed before each test. This is convenient
 if you need to do some setup that is the same for every test.
@@ -399,8 +399,15 @@ which can then be used by your tests (accessed via
 ``this%somedata``). Conversely, if you want the tearDown method to deallocate a
 variable, that variable cannot be local to your test subroutine. Instead, you
 can make the variable a member of the class, so that the tearDown method can
-access it. It is perfectly acceptable to have something like this in your test
-routine::
+access it. So, for example, if you have this variable in your test class (as in
+the example)::
+
+  real(r8), pointer :: somedata(:)
+
+Then ``somedata`` can be created in the setUp method (if it needs to be the same
+for every test). Alternatively, it can be created in each test routine that
+needs it (if it differs from test to test, or some tests don't need it at
+all). Its creation can look like::
 
   allocate(this%somedata(5))
   this%somedata(:) = [1,2,3,4,5]
