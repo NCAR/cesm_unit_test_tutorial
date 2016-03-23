@@ -11,7 +11,8 @@ set(pf_sources
 # For "*.in" files (which are converted to F90 files by genf90), you should list
 # these as foo.F90, NOT foo.F90.in.
 set(sources_needed
-  circle.F90)
+  circle.F90
+  shr_kind_mod.F90)
 extract_sources("${sources_needed}" "${share_sources}" test_sources)
 
 # Do source preprocessing and add the executable.
