@@ -133,6 +133,9 @@ Then run the following command::
 
 Note that the build is done in the directory ``$UNITTEST_ROOT/__command_line_test__``.
 
+Now skip ahead to the section, `Determining if the unit tests successfully built
+and ran`_.
+
 Building and running on your local machine
 ------------------------------------------
 
@@ -374,6 +377,8 @@ build, following the same instructions as above. I generally just try building
 the unit tests and seeing if the build complains: it will tell you about any
 missing dependencies.
 
+This step should not be needed for the example in this tutorial.
+
 Testing the build
 ^^^^^^^^^^^^^^^^^
 
@@ -401,6 +406,8 @@ your new test directory. For this example, this is:
 
 * For driver_cpl: cime/driver_cpl/unit_test/CMakeLists.txt
 
+You can add the new ``add_subdirectory`` call at the bottom of the file.
+
 Special note for CLM
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -410,6 +417,8 @@ call at the bottom of ``components/clm/src/CMakeLists.txt``, as in::
 
   add_subdirectory(${CLM_ROOT}/src/cpl/test clm_cpl_test)
 
+This should **not** be needed if you used the recommended location in this
+tutorial.
 
 Add a CMakeLists.txt file in your new unit test directory
 ---------------------------------------------------------
@@ -417,7 +426,8 @@ Add a CMakeLists.txt file in your new unit test directory
 You need to put a ``CMakeLists.txt`` file in your new unit test directory, which
 tells CMake how to build this unit test. For this ``circle_test`` example, you
 can copy one of the files from the ``cmake_files`` subdirectory of this
-repository. Pick the file matching the component you are testing. Copy this file
+repository. Pick the file matching the component you are testing (e.g.,
+``CMakeLists_cam.txt`` if you're doing this example for CAM). Copy this file
 into your new unit test directory (the directory containing
 ``test_circle.pf``). **Rename the file to just CMakeLists.txt.**
 
