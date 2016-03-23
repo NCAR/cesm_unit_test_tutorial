@@ -94,8 +94,8 @@ important paths:**
   * cam: components/cam/test/unit
 
     * The CAM unit testing is broken at least as of cam5_4_51 (and for many
-      previous tags). It works in
-      https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/fix_unit_tests_with_cime_tags/fix_unit_tests_with_cime_n01_cam5_4_51
+      previous tags). It works in `this branch tag
+      <https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/fix_unit_tests_with_cime_tags/fix_unit_tests_with_cime_n01_cam5_4_51>`_.
 
   * cime (includes tests of csm_share and driver_cpl): cime
 
@@ -127,8 +127,9 @@ and wait for an interactive prompt.
 
 Then run the following command::
 
-  $CIMEROOT/tools/unit_testing/run_tests.py --test-spec-dir=. --compiler=intel --mpilib=mpich2 \
-  --mpirun-command=mpirun.lsf --cmake-args=-DPAPI_LIB=/glade/apps/opt/papi/5.3.0/intel/12.1.5/lib64
+  $CIMEROOT/tools/unit_testing/run_tests.py --test-spec-dir=. --compiler=intel \
+  --mpilib=mpich2 --mpirun-command=mpirun.lsf \
+  --cmake-args=-DPAPI_LIB=/glade/apps/opt/papi/5.3.0/intel/12.1.5/lib64
 
 Note that the build is done in the directory ``$UNITTEST_ROOT/__command_line_test__``.
 
@@ -233,8 +234,8 @@ a final message like this::
 If just one or two tests fail, this could mean that these tests are currently
 broken in the version of the code you're using. **Note that all CAM unit tests
 are broken on the trunk at least as of cam5_4_51 (and for many previous tags).**
-If you want to write unit tests for CAM, you can use
-https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/fix_unit_tests_with_cime_tags/fix_unit_tests_with_cime_n01_cam5_4_51
+If you want to write unit tests for CAM, you can use `this branch tag
+<https://svn-ccsm-models.cgd.ucar.edu/cam1/branch_tags/fix_unit_tests_with_cime_tags/fix_unit_tests_with_cime_n01_cam5_4_51>`_.
 
 
 Writing the unit tests
