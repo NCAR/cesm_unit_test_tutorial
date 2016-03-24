@@ -9,6 +9,8 @@ Credits:
 * Sean Santos, for putting together the unit testing infrastructure that we use
   in CESM
 
+* Ben Andre, for putting together the initial local machine build scripts
+
 .. sectnum::
 
 .. contents::
